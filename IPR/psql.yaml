@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psql-deployment
+  labels:
+    app: psql
+spec:
+#  replicas: 1
+  selector:
+    matchLabels:
+      app: psql
+  template:
+    metadata:
+      labels:
+        app: psql
+    spec:
+      containers:
+      - name: psql
+        image: postgres:14.5
+        ports:
+        - containerPort: 27017
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: db-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: db-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: psql-service
+spec:
+  selector:
+    app: psql
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
