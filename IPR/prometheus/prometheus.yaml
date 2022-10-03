@@ -5,9 +5,9 @@ metadata:
   labels:
     name: prometheus-deployment
   name: prometheus
-#  namespace: kube-system
+  namespace: kube-system
 spec:
-#  replicas: 1
+  replicas: 1
   selector:
     matchLabels:
       app: prometheus
@@ -40,14 +40,13 @@ spec:
           limits:
             cpu: 500m
             memory: 2500Mi
-#      serviceAccountName: prometheus    
+      serviceAccountName: prometheus    
       volumes:
       - name: data
         emptyDir: {}
       - name: config-volume
         configMap:
           name: prometheus-config
-
 ---
 kind: Service
 apiVersion: v1
@@ -55,7 +54,7 @@ metadata:
   labels:
     app: prometheus
   name: prometheus
-#  namespace: kube-system
+  namespace: kube-system
 spec:
   type: NodePort
   ports:
