@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-exporter
-#  namespace: kube-system
+  namespace: kube-system
   labels:
-    app: node-exporter
+    k8s-app: node-exporter
 spec:
   selector:
     matchLabels:
-      app: node-exporter
+      k8s-app: node-exporter      
   template:
     metadata:
       labels:
-        app: node-exporter
+        k8s-app: node-exporter
     spec:
       containers:
       - image: prom/node-exporter
@@ -20,20 +20,21 @@ spec:
         ports:
         - containerPort: 9100
           protocol: TCP
+          name: http
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: node-exporter
+    k8s-app: node-exporter
   name: node-exporter
-#  namespace: kube-system
+  namespace: kube-system
 spec:
   ports:
-    - port: 9100
-      targetPort: 9100
-      nodePort: 31111
-      protocol: TCP
+  - name: http
+    port: 9100
+    nodePort: 31111
+    protocol: TCP
   type: NodePort
   selector:
-    app: node-exporter
+    k8s-app: node-exporter
