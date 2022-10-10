@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: izdb-config
+  namespace: default
+  labels:
+    type: config
+    app: izdb
+data:
+  POSTGRES_PASSWORD: "changeme"
+  TIMESCALEDB_TELEMETRY: "off"

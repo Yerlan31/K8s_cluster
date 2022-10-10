@@ -1,0 +1,12 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: local-volume-replica
+spec:
+  storageClassName: "local-storage-replica"
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
