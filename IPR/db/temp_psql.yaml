@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: izdb-standby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: izdb-standby
+  template:
+    metadata:
+      labels:
+        type: izdb-standby
+        app: izdb-standby
+    spec:
+      volumes:
+      - name: izdb-standby-mnt
+        persistentVolumeClaim:
+          claimName: local-volume-replica
+      - name: izdb-standby-config-mnt
+        configMap:
+          name: izdb-standby-conf-files-config
+      containers:
+      - name: init-izdb
+        image: postgres:10
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: izdb-config
+              key: POSTGRES_PASSWORD
+        command: ['sh', '-c', 'PGPASSWORD="changeme" pg_basebackup -h psql-master-service -D /var/lib/postgresql/data -U repuser -vP ']
+#        command: ['sh', '-c',  'pg_basebackup -h psql-master-service -D /var/lib/postgresql/data -U repuser -vP ']
+        volumeMounts:
+        - name:  izdb-standby-mnt
+          mountPath: /var/lib/postgresql/data

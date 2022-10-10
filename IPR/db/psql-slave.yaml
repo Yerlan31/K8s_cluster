@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: izdb-standby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: izdb-standby
+  template:
+    metadata:
+      labels:
+        type: izdb-standby
+        app: izdb-standby
+    spec:
+      containers:
+      - image: postgres:10
+        imagePullPolicy: IfNotPresent
+        name: izdb-standby
+        ports:
+          - containerPort: 5432
+        envFrom:
+          - configMapRef:
+              name: izdb-config
+        volumeMounts:
+          - name: izdb-standby-mnt
+            mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: izdb-standby-mnt
+        persistentVolumeClaim:
+          claimName: local-volume-replica
+      - name: izdb-standby-config-mnt
+        configMap:
+          name: izdb-standby-conf-files-config
+      initContainers:
+      - name: init-izdb-standby
+        image: timescale/timescaledb:latest-pg10
+        command: ['sh', '-c', 'cp /var/lib/postgresql/data/postgresql.main.conf /var/lib/postgresql/data/postgresql.conf && cp /var/lib/postgresql/data/recovery.main.conf /var/lib/postgresql/data/recovery.conf && chmod 600 /var/lib/postgresql/data/postgresql.conf && chmod 600 /var/lib/postgresql/data/recovery.conf']
+        volumeMounts:
+        - name: izdb-standby-mnt
+          mountPath: /var/lib/postgresql/data
+        - name: izdb-standby-config-mnt
+          mountPath: /var/lib/postgresql/data/postgresql.main.conf
+          subPath: postgresql.conf
+        - name: izdb-standby-config-mnt
+          mountPath: /var/lib/postgresql/data/recovery.main.conf
+          subPath: recovery.conf          
