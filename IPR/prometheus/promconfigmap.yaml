@@ -4,12 +4,35 @@ metadata:
   name: prometheus-config
   namespace: kube-system
 data:
+  prometheus.rules: |-
+    groups:
+    - name: devopscube demo alert
+      rules:
+      - alert: InstanceDown
+        expr: up{job="jenkins"} == 0
+      - alert: High Pod Memory
+        expr: sum(container_memory_usage_bytes) > 1
+        for: 1m
+        labels:
+          severity: slack
+        annotations:
+          summary: High Memory Usage
   prometheus.yml: |
     global:
       scrape_interval:     15s
       evaluation_interval: 15s
-    scrape_configs:
 
+    rule_files:
+      - /etc/prometheus/prometheus.rules
+
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager.kube-system.svc:9093"
+
+    scrape_configs:
     - job_name: 'kubernetes-apiservers'
       kubernetes_sd_configs:
       - role: endpoints
